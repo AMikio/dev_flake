@@ -97,8 +97,8 @@
             pythonPkgs.python-lsp-server
           ]
           ++ (with pkgs; [
-            pkgs.ruff
-            pkgs.uv
+            ruff
+            uv
           ]);
         env =
           {
