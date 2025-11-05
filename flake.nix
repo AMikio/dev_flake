@@ -24,6 +24,13 @@
       };
     };
 
+    cpp = {
+      description = ''
+        C++ flake - Basic C++ development environment.
+      '';
+      path = ./templates/cpp;
+    };
+
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
   };
 }
