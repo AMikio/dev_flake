@@ -33,6 +33,23 @@
   }: let
     inherit (nixpkgs) lib;
 
+    supportedSystems = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
+    forEachSupportedSystem = f:
+      nixpkgs.lib.genAttrs supportedSystems (
+        system:
+          f {
+            pkgs = import nixpkgs {
+              inherit system;
+              config.allowUnfree = true;
+            };
+          }
+      );
+
     # Load a uv workspace from a workspace root.
     # Uv2nix treats all uv projects as workspace projects.
     workspace = uv2nix.lib.workspace.loadWorkspace {workspaceRoot = ./.;};
@@ -60,38 +77,18 @@
       # Note that uv2nix is _not_ using Nixpkgs buildPythonPackage.
       # It's using https://pyproject-nix.github.io/pyproject.nix/build.html
     };
-
     # This example is only using x86_64-linux
     # pkgs = nixpkgs.legacyPackages.x86_64-linux;
-    pkgs = import nixpkgs {
-      system = "x86_64-linux";
-      config.allowUnfree = true;
-    };
-
     # Use Python 3.12 from nixpkgs
-    python = pkgs.python312;
-    pythonPkgs = pkgs.python312Packages;
-
-    # Construct package set
-    pythonSet =
-      # Use base package set from pyproject.nix builders
-      (pkgs.callPackage pyproject-nix.build.packages {
-        inherit python;
-      }).overrideScope
-      (
-        lib.composeManyExtensions [
-          pyproject-build-systems.overlays.default
-          overlay
-          pyprojectOverrides
-        ]
-      );
-
-    driverPackage = pkgs.linuxKernel.packages.linux_zen.nvidia_x11_latest;
   in {
     # This example provides two different modes of development:
     # - Impurely using uv to manage virtual environments
     # - Pure development using uv2nix to manage virtual environments
-    devShells.x86_64-linux = {
+    devShells = forEachSupportedSystem ({pkgs}: let
+      python = pkgs.python312;
+      pythonPkgs = pkgs.python312Packages;
+      driverPackage = pkgs.linuxKernel.packages.linux_zen.nvidia_x11_latest;
+    in {
       default = pkgs.mkShell {
         packages =
           [
@@ -125,6 +122,6 @@
           echo
         '';
       };
-    };
+    });
   };
 }
