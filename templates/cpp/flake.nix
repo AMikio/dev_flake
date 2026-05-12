@@ -25,10 +25,10 @@
         packages = with pkgs; [
           clang-tools
           cmake
-          vcpkg
-          vcpkg-tool
+          ninja
           pkg-config
           cmake-language-server
+          lldb
         ];
 
         env = {

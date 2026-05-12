@@ -10,25 +10,19 @@
       default = python;
 
       python = {
-        description = ''
-          Default flake - Basic uv setup with Python.
-        '';
+        description = "Default flake - Basic uv setup with Python.";
         path = ./templates/python;
       };
 
       python-cuda = {
-        description = ''
-          CUDA flake - Development with GPU accelerated tools using CUDA.
-        '';
+        description = "CUDA flake - Development with GPU accelerated tools using CUDA.";
         path = ./templates/python-cuda;
       };
-    };
 
-    cpp = {
-      description = ''
-        C++ flake - Basic C++ development environment.
-      '';
-      path = ./templates/cpp;
+      cpp = {
+        description = "C++ flake - Basic C++ development environment.";
+        path = ./templates/cpp;
+      };
     };
 
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
