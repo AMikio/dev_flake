@@ -41,7 +41,10 @@
             UV_PYTHON = python.interpreter;
           }
           // lib.optionalAttrs pkgs.stdenv.isLinux {
-            LD_LIBRARY_PATH = lib.makeLibraryPath pkgs.pythonManylinuxPackages.manylinux1;
+            # glibc excluded: Determinate Nix (glibc-2.40, DT_RUNPATH) segfaults when a newer
+            # glibc appears on LD_LIBRARY_PATH. Wheels resolve glibc via ELF interpreter, not here.
+            LD_LIBRARY_PATH = lib.makeLibraryPath
+              (builtins.filter (p: (p.pname or "") != "glibc") pkgs.pythonManylinuxPackages.manylinux1);
           };
         shellHook = ''
           unset PYTHONPATH

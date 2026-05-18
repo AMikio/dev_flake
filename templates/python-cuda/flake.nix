@@ -42,7 +42,12 @@
           UV_PYTHON = python.interpreter;
           CUDA_PATH = "${cuda}";
           # makeLibraryPath appends /lib; /run/opengl-driver/lib is appended as-is
-          LD_LIBRARY_PATH = "${lib.makeLibraryPath (pkgs.pythonManylinuxPackages.manylinux1 ++ [cuda pkgs.stdenv.cc.cc.lib])}:/run/opengl-driver/lib";
+          # glibc excluded: Determinate Nix (glibc-2.40, DT_RUNPATH) segfaults when a newer
+          # glibc appears on LD_LIBRARY_PATH. Wheels resolve glibc via ELF interpreter, not here.
+          LD_LIBRARY_PATH = "${lib.makeLibraryPath (
+            (builtins.filter (p: (p.pname or "") != "glibc") pkgs.pythonManylinuxPackages.manylinux1)
+            ++ [cuda pkgs.stdenv.cc.cc.lib]
+          )}:/run/opengl-driver/lib";
           EXTRA_LDFLAGS = "-L/lib -L${cuda}/lib";
           EXTRA_CCFLAGS = "-I/usr/include";
         };
